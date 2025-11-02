@@ -1,0 +1,2 @@
+Vježba 4: Zbrajanje unesenih brojeva
+Napišite program koji traži od korisnika unos cijelih brojeva sve dok korisnik ne unese broj 0. Nakon unosa 0, program treba ispisati zbroj svih prethodno unesenih brojeva.
