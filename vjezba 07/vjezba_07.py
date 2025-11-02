@@ -13,6 +13,13 @@
 
 # Kod za provjeru dodajte u funkciju provjera_lozinke(lozinka).
 
+forbidden_words_list: list[str] = ["password", "lozinka"]
+
+
+def check_forbidden_words(lozinka: str) -> bool:
+    lower_case = lozinka.lower()
+    return not any(word.lower() in lower_case for word in forbidden_words_list)
+
 
 def provjera_lozinke(lozinka: str) -> None:
     # checks:
@@ -23,3 +30,18 @@ def provjera_lozinke(lozinka: str) -> None:
     # at least one number
     at_least_one_number: bool = any(ch.isdigit() for ch in lozinka)
     # forbidden words
+    forbidden_words: bool = check_forbidden_words(lozinka)
+
+    if not between_8_and_15_characters:
+        print("Lozinka mora sadržavati između 8 i 15 znakova")
+    elif not at_least_one_uppercase or not at_least_one_number:
+        print("Lozinka mora sadržavati barem jedno veliko slovo i jedan broj")
+    elif not forbidden_words:
+        print("Lozinka ne smije sadržavati riječi 'password' ili 'lozinka'")
+    else:
+        print("Lozinka je jaka!")
+
+
+if __name__ == "__main__":
+    pw = input("Unesi lozinku: ").strip()
+    provjera_lozinke(pw)
