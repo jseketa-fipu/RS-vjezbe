@@ -1,34 +1,19 @@
-# Vježba 15: Pobroji samoglasnike i suglasnike
+# Vježba 16: Implementacija Dijsktra algoritma za pronalaženje najkraćeg puta
 
-# Napišite funkciju count_vowels_consonants() koja prima string i vraća rječnik s brojem samoglasnika i brojem suglasnika u tekstu.
+# Napišite funkciju dijkstra(graph, start) koja prima graf predstavljen kao rječnik susjedstva i početni čvor te vraća rječnik s najkraćim udaljenostima od početnog čvora do svih ostalih čvorova u grafu koristeći Dijsktra algoritam.
 
-# vowels = "aeiouAEIOU"
-# consonants = "bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ"
+# Za rješavanje zadatka možete koristiti modul heapq za gotovu implementaciju prioritetnog reda.
 
-# Primjer:
+# Primjer ulaznih podataka
 
-# tekst = "Python je programski jezik koji je jednostavan za učenje i korištenje. Python je vrlo popularan."
+# graph = {
+#     'A': [('B', 1), ('C', 4)],
+#     'B': [('A', 1), ('C', 2), ('D', 5)],
+#     'C': [('A', 4), ('B', 2), ('D', 1)],
+#     'D': [('B', 5), ('C', 1)]
+# }
 
-# print(count_vowels_consonants(tekst))
+# Primjer poziva funkcije:
 
-# # {'vowels': 30, 'consonants': 48}
-
-
-def count_vowels_consonants(text: str) -> dict[str, int]:
-    vowels = "aeiouAEIOU"
-    consonants = "bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ"
-
-    counts = {"vowels": 0, "consonants": 0}
-
-    for character in text:
-        if character in vowels:
-            counts["vowels"] += 1
-        elif character in consonants:
-            counts["consonants"] += 1
-
-    return counts
-
-
-text = "Python je programski jezik koji je jednostavan za učenje i korištenje. Python je vrlo popularan."
-
-print(count_vowels_consonants(text))
+# print(dijkstra(graph, 'A'))
+# # {'A': 0, 'B': 1, 'C': 3, D': 4}
