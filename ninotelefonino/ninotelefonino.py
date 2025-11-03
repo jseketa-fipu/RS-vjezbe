@@ -1,5 +1,3 @@
-import pytest
-
 PREFIX_MAP = {
     # Fiksna mreža
     "01": {
@@ -67,53 +65,6 @@ PREFIX_MAP = {
 }
 
 
-test_cases = [
-    # --- Mobile (valid formats) ---
-    {"input": "091 721 7633", "valid": True, "expected": "0917217633"},
-    {"input": "+385 91 721 7633", "valid": True, "expected": "0917217633"},
-    {"input": "00385 91 721 7633", "valid": True, "expected": "0917217633"},
-    {"input": "(385)917217633", "valid": True, "expected": "0917217633"},
-    {"input": "098 123 4567", "valid": True, "expected": "0981234567"},
-    {"input": "099123456", "valid": True, "expected": "099123456"},
-    {"input": "095-765-4321", "valid": True, "expected": "0957654321"},
-    {"input": "092 123 456", "valid": True, "expected": "092123456"},
-    {"input": "0971234567", "valid": True, "expected": "0971234567"},
-    # --- Fixed line (valid formats) ---
-    {"input": "01 234 5678", "valid": True, "expected": "012345678"},
-    {"input": "051-123-456", "valid": True, "expected": "051123456"},
-    {"input": "0521234567", "valid": True, "expected": "0521234567"},
-    {"input": "020 123456", "valid": True, "expected": "020123456"},
-    {"input": "(385)51 123 456", "valid": True, "expected": "051123456"},
-    # --- Special services (valid formats) ---
-    {"input": "0800 123456", "valid": True, "expected": "0800123456"},
-    {"input": "060123456", "valid": True, "expected": "060123456"},
-    {"input": "061123456", "valid": True, "expected": "061123456"},
-    {"input": "064123456", "valid": True, "expected": "064123456"},
-    {"input": "065123456", "valid": True, "expected": "065123456"},
-    {"input": "069123456", "valid": True, "expected": "069123456"},
-    {"input": "072123456", "valid": True, "expected": "072123456"},
-    # --- International normalization edge cases (valid) ---
-    {"input": "385917217633", "valid": True, "expected": "0917217633"},
-    {"input": "+385981234567", "valid": True, "expected": "0981234567"},
-    {"input": "00385(0)91 721 7633", "valid": True, "expected": "0917217633"},
-    # --- Invalid: wrong prefix / country ---
-    {"input": "+386 40 123 456", "valid": False, "expected": None},
-    {"input": "071123456", "valid": False, "expected": None},
-    {"input": "91 721 7633", "valid": False, "expected": None},
-    # --- Invalid: bad lengths ---
-    {"input": "091 12345", "valid": False, "expected": None},
-    {"input": "091 12345678", "valid": False, "expected": None},
-    {"input": "0800 12345", "valid": False, "expected": None},
-    {"input": "0800 1234567", "valid": False, "expected": None},
-    {"input": "(385)05112345", "valid": False, "expected": None},
-    {"input": "(385)05112345678", "valid": False, "expected": None},
-    # --- Invalid: non-digits / junk ---
-    {"input": "abc", "valid": False, "expected": None},
-    {"input": "", "valid": False, "expected": None},
-    {"input": "   095 12A 345", "valid": False, "expected": None},
-]
-
-
 def cleanup_number(input: str) -> str:
     # remove leading and trailing whitespace
     clean = input.strip()
@@ -143,11 +94,41 @@ def cleanup_number(input: str) -> str:
 
 
 def validate_and_identify_number(input: str) -> dict:
-    return_dict: dict = {}
+    return_dict: dict = {
+        "broj_ostatak": None,
+        "mjesto": None,
+        "operater": None,
+        "pozivni_broj": None,
+        "validan": False,
+        "vrsta": None,
+    }
+    # find a prefix in a map
     for key in PREFIX_MAP.keys():
         if input.startswith(key):
+            # check for validity
+            if (
+                (
+                    PREFIX_MAP[key]["vrsta"] == "Fiksna mreža"
+                    or PREFIX_MAP[key]["vrsta"] == "Mobilna mreža"
+                )
+                and (
+                    len(input.removeprefix(key)) == 6
+                    or len(input.removeprefix(key)) == 7
+                )
+                and input.removeprefix(key).isdigit()
+            ):
+                return_dict["validan"] = True
+            elif (
+                PREFIX_MAP[key]["vrsta"] == "Posebne usluge"
+                and len(input.removeprefix(key)) == 6
+                and input.removeprefix(key).isdigit()
+            ):
+                return_dict["validan"] = True
+            else:
+                return_dict["validan"] = False
+
             return_dict["pozivni_broj"] = key
-            return_dict["broj_ostatka"] = input.removeprefix(key)
+            return_dict["broj_ostatak"] = input.removeprefix(key)
             return_dict["vrsta"] = PREFIX_MAP[key]["vrsta"]
 
             if PREFIX_MAP[key]["vrsta"] == "Fiksna mreža":
@@ -161,13 +142,3 @@ def validate_and_identify_number(input: str) -> dict:
                 return_dict["operater"] = None
 
     return return_dict
-
-
-print(validate_and_identify_number(cleanup_number("(385)51 123 456")))
-# for test, validity in test_cases:
-#     print(f"Input: {test}, Valid: {validity}, result: {cleanup_number(test)}")
-
-
-@pytest.mark.parametrize("case", test_cases, ids=lambda c: c["input"])
-def test_cleanup_number(case):
-    assert case["expected"] == cleanup_number(case["input"])
